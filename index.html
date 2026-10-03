@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Kanit', sans-serif; }
+        body { background-color: #f8fafc; }
+        .liquid-glass {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+        .liquid-bg-wrapper {
+            position: relative;
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+            overflow: hidden;
+        }
+        .liquid-blob {
+            position: absolute;
+            filter: blur(30px);
+            opacity: 0.6;
+            animation: float 8s infinite alternate ease-in-out;
+        }
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, -20px) scale(1.15); }
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-6 min-h-screen text-slate-800">
+    <div class="max-w-md mx-auto space-y-4">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-blue-200">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-800 leading-tight">Employee Portal</h1>
+                    <p class="text-xs text-slate-500">ระบบจัดการข้อมูลพนักงาน</p>
+                </div>
+            </div>
+            <button onclick="openModal()" class="bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-medium hover:bg-blue-700 transition flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-plus"></i> เพิ่ม
+            </button>
+        </div>
+
+        <!-- Banner: Liquid Glass (ความกว้างพอดีเท่ากับกรอบด้านล่าง) -->
+        <div class="liquid-bg-wrapper rounded-3xl p-4 sm:p-5 text-white shadow-lg relative">
+            <div class="liquid-blob w-32 h-32 bg-cyan-400 rounded-full -top-10 -left-10"></div>
+            <div class="liquid-blob w-32 h-32 bg-indigo-500 rounded-full -bottom-10 -right-10"></div>
+            
+            <div class="liquid-glass rounded-2xl p-4 text-slate-900 relative z-10 text-center">
+                <span class="inline-flex items-center gap-1 bg-white/70 px-3 py-1 rounded-full text-xs font-semibold text-blue-700 mb-2 border border-white/60">
+                    👋 ยินดีต้อนรับ
+                </span>
+                <h2 class="text-xl font-bold text-slate-900 tracking-tight mb-1">พร้อมทำงานวันนี้! 👋</h2>
+                <p class="text-xs text-slate-600 mb-3 max-w-xs mx-auto">ระบบจัดการและค้นหาข้อมูลพนักงานอย่างรวดเร็ว</p>
+                <div class="flex justify-center gap-2">
+                    <button onclick="filterAll()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-xl font-medium shadow-sm hover:bg-blue-700 transition">
+                        <i class="fa-solid fa-list-ul mr-1"></i> รายชื่อทั้งหมด
+                    </button>
+                    <button onclick="resetData()" class="bg-white/80 text-slate-700 text-xs px-3 py-1.5 rounded-xl font-medium border border-slate-200 hover:bg-white transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> รีเซ็ต
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+                    <i class="fa-solid fa-user-group"></i>
+                </div>
+                <div>
+                    <div class="text-[11px] text-slate-400 font-medium">พนักงานทั้งหมด</div>
+                    <div id="statTotal" class="text-lg font-bold text-slate-800">234 คน</div>
+                </div>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+                <div>
+                    <div class="text-[11px] text-slate-400 font-medium">ปฏิบัติงานอยู่</div>
+                    <div id="statActive" class="text-lg font-bold text-slate-800">234 คน</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" oninput="renderList()" placeholder="ค้นหารหัสพนักงาน (เช่น C22264, R26224)..." 
+                    class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 focus:bg-white transition">
+                <button onclick="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex justify-between items-center text-[11px] text-slate-500 px-1">
+                <span id="resultCount">กำลังแสดงผล 234 คน</span>
+                <span class="text-emerald-600 font-medium"><i class="fa-solid fa-circle-check"></i> บันทึกในเครื่องแล้ว</span>
+            </div>
+        </div>
+
+        <!-- Employee List -->
+        <div id="employeeList" class="space-y-2">
+            <!-- Items rendered via JS -->
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-slate-100 space-y-4">
+            <div class="flex justify-between items-center pb-2 border-b">
+                <h3 id="modalTitle" class="font-bold text-slate-800">แก้ไขข้อมูลพนักงาน</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="empForm" onsubmit="saveEmployee(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-500 mb-1">รหัสพนักงาน</label>
+                    <input type="text" id="empCode" required class="w-full p-2 bg-slate-50 border rounded-xl font-bold uppercase focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-slate-500 mb-1">ตำแหน่ง</label>
+                    <input type="text" id="empPos" placeholder="เช่น พนักงานการผลิต" class="w-full p-2 bg-slate-50 border rounded-xl focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-slate-500 mb-1">BR / ซอย</label>
+                        <input type="text" id="empBR" placeholder="เช่น BR-01" class="w-full p-2 bg-slate-50 border rounded-xl focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 mb-1">สเตชั่น</label>
+                        <input type="text" id="empST" placeholder="เช่น ST-01" class="w-full p-2 bg-slate-50 border rounded-xl focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-500 mb-1">เครื่องจักร</label>
+                    <input type="text" id="empMC" placeholder="เช่น MC-05" class="w-full p-2 bg-slate-50 border rounded-xl focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeModal()" class="w-1/2 py-2 rounded-xl border border-slate-200 text-slate-600 font-medium">ยกเลิก</button>
+                    <button type="submit" class="w-1/2 py-2 rounded-xl bg-blue-600 text-white font-medium shadow-sm hover:bg-blue-700">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const initialCodes = ["C22264","R26224","C25DA2","C25DA5","R2618K","C25C13","R2621D","C22165","C22238","C25BB4","C25DA7","C25C25","R26184","C22108","C22227","C25DA3","R2621C","C25CA2","R26180","C22125","C22233","C25DA4","R2622B","C25C11","R2618F","C22131","C22237","C25D11","R26221","C25C19","R26189","C22153","C22251","C25DA8","R26222","C25C26","R26181","C22159","C22252","C25D23","R26223","C25C31","R2618C","C22164","C22262","C25D24","R26228","C25C33","R26182","C22188","C22288","C25D32","R26227","C25C39","R2618L","C22194","C22292","C25D26","R26219","C25C30","R2619A","C22195","C22296","C25D27","R26214","C25CB6","R2619F","C22198","C2221A","C25E12","R2621B","C25C1A","R2620A","C22204","C2221F","C25E13","R2621E","C25C3B","R26200","C22208","C25A24","C25E15","R2621G","C25CB1","R26204","C22212","C25B15","C25E22","R2621H","C25C1F","R26203","C22213","C25B20","C25E25","R2621K","C25CC1","R2620E","C22222","C25BC2","C25E27","R2621L","C25CA5","R2620F","C22231","C25BA4","C25E34","R2621M","C25CA6","R26201","C22232","C25BA6","C25E36","R26213","C25CA8","R26206","C22235","C25BA7","C25E2D","R26212","C25C1D","R26208","C22236","C25BA9","C25E3B","R26216","C25C2B","R26209","C22241","C25BB8","C25E1F","R2618B","C25C2C","R26201","C22243","C25BD1","C25E2A","R2618E","C25C2D","R26203","C22244","C25C22","C25E2B","R2618J","C25C2F","R26208","C22248","C25C24","C25E2F","R26187","C25C3F","R2620B","C22258","C25C27","C25EA1","R26188","C25CB3","R2620D","C22263","C25CA9","C25EA3","R26181","C25CC2","R2620H","C22265","C25CB2","C25EA5","R26186","C25C2E","R26201","C22271","C25CC4","C25EA6","R2618A","C25CC8","R2620M","C22273","C25CC6","C25EA7","R2621A","C25CC9","R2617A","C22275","C25D13","C25EA9","R2621F","C25C2A","R2617D","C22279","C25D16","C25EAB","R26211","C25CD2","R26172","C22283","C25D1B","C25EAC","R26217","C25E1A","R26175","C22285","C25D1D","C25EAF","R26218","C25E29","R26176","C22286","C25D25","C25EB1","R2622A","C25E21","R26179","C22291","C25DA1","C25EB6","R2622D","C25E20","R26173","C22295","C25D2A","C25EB8","R2622E","C25E37","R26178","C22297","C25D1F","C25E2C","R2622F","C25EA2","R2617C","C22298","C25D2B","C25EB3","R26224","C25EB5","R2617F","C2221B","C25D2D","C25EB4","R26225","C25EB7","R2617G","C2221D","C25D34","C25EBD","R26226","C25EBB","R2617L","C2221E","C25D38","C25EBE","R26229","C25EBC","R2617M","C2221H","C25DA6","C25ED2","R26220","C25EBD","R26170"];
+
+        let employees = JSON.parse(localStorage.getItem('emp_db_v2')) || initialCodes.map(code => ({
+            code: code,
+            pos: 'พนักงานการผลิต',
+            br: 'BR-01',
+            st: 'ST-01',
+            mc: 'MC-01'
+        }));
+
+        let editingCode = null;
+
+        function saveToStorage() {
+            localStorage.setItem('emp_db_v2', JSON.stringify(employees));
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('statTotal').innerText = employees.length + ' คน';
+            document.getElementById('statActive').innerText = employees.length + ' คน';
+        }
+
+        function renderList() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const listEl = document.getElementById('employeeList');
+            listEl.innerHTML = '';
+
+            const filtered = employees.filter(emp => 
+                emp.code.toLowerCase().includes(query) ||
+                (emp.br && emp.br.toLowerCase().includes(query)) ||
+                (emp.pos && emp.pos.toLowerCase().includes(query))
+            );
+
+            document.getElementById('resultCount').innerText = `กำลังแสดงผล ${filtered.length} จาก ${employees.length} คน`;
+
+            filtered.forEach(emp => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between hover:border-blue-200 transition";
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-bold text-xs flex items-center justify-center shadow-sm">
+                            ${emp.code.substring(0, 3)}
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-800 text-sm">${emp.code}</span>
+                                ${emp.br ? `<span class="bg-slate-100 text-slate-600 text-[10px] px-1.5 py-0.5 rounded-md font-medium">${emp.br}</span>` : ''}
+                            </div>
+                            <div class="text-[11px] text-slate-500">${emp.pos || 'ไม่ระบุตำแหน่ง'}</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5 flex gap-2">
+                                <span><i class="fa-solid fa-sitemap"></i> ${emp.st || '-'}</span>
+                                <span><i class="fa-solid fa-gear"></i> ${emp.mc || '-'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="editEmp('${emp.code}')" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-500 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center transition">
+                        <i class="fa-solid fa-pen-to-square text-xs"></i>
+                    </button>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            renderList();
+        }
+
+        function filterAll() {
+            clearSearch();
+        }
+
+        function resetData() {
+            if(confirm('ต้องการรีเซ็ตข้อมูลเป็นค่าเริ่มต้นทั้งหมดหรือไม่?')) {
+                localStorage.removeItem('emp_db_v2');
+                location.reload();
+            }
+        }
+
+        function openModal(code = null) {
+            editingCode = code;
+            const modal = document.getElementById('editModal');
+            document.getElementById('modalTitle').innerText = code ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่';
+            
+            if(code) {
+                const emp = employees.find(e => e.code === code);
+                document.getElementById('empCode').value = emp.code;
+                document.getElementById('empCode').disabled = true;
+                document.getElementById('empPos').value = emp.pos || '';
+                document.getElementById('empBR').value = emp.br || '';
+                document.getElementById('empST').value = emp.st || '';
+                document.getElementById('empMC').value = emp.mc || '';
+            } else {
+                document.getElementById('empForm').reset();
+                document.getElementById('empCode').disabled = false;
+            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function editEmp(code) {
+            openModal(code);
+        }
+
+        function saveEmployee(e) {
+            e.preventDefault();
+            const code = document.getElementById('empCode').value.trim().toUpperCase();
+            const pos = document.getElementById('empPos').value.trim();
+            const br = document.getElementById('empBR').value.trim();
+            const st = document.getElementById('empST').value.trim();
+            const mc = document.getElementById('empMC').value.trim();
+
+            if(editingCode) {
+                const idx = employees.findIndex(e => e.code === editingCode);
+                if(idx !== -1) {
+                    employees[idx] = { code: editingCode, pos, br, st, mc };
+                }
+            } else {
+                if(employees.some(e => e.code === code)) {
+                    alert('รหัสพนักงานนี้มีในระบบแล้ว!');
+                    return;
+                }
+                employees.unshift({ code, pos, br, st, mc });
+            }
+
+            saveToStorage();
+            renderList();
+            closeModal();
+        }
+
+        // Initialize
+        saveToStorage();
+        renderList();
+    </script>
+</body>
+</html>
+
+
+
+
